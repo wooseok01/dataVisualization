@@ -1,0 +1,246 @@
+extends layout
+
+block content
+
+  script(src='//d3js.org/d3.v3.min.js')
+  div#renderer(style='width:800px;' + 'height:800px;')
+    div#scatterPlot
+    span.y20.absolute 20
+    span.y40.absolute 40
+    span.y60.absolute 60
+    span.y80.absolute 80
+
+    span#x20.absolute 20
+    span#x40.absolute 40
+    span#x60.absolute 60
+    span#x80.absolute 80
+
+  div#renderer2(style='width:800px;' + 'height:800px;')
+    div#barGraph
+    span.y20.absolute 2
+    span.y40.absolute 4
+    span.y60.absolute 6
+    span.y80.absolute 8
+
+
+  style.
+
+    body{
+      margin : 0;
+      padding : 0px;
+      padding-top : 30px;
+    }
+
+    #renderer{
+      float : left;
+      position: relative;
+    }
+
+    #scatterPlot {
+      width : 600px;
+      height : 600px;
+      margin : 0 auto;
+    }
+
+    rect{
+      background-color : white;
+    }
+
+    .absolute{
+      position : absolute;
+      left : 75px;
+      top : 610px;
+    }
+
+    .y20{
+      top : 475px;
+    }
+
+    .y40 {
+      top : 355px;
+    }
+
+    .y60{
+      top : 235px;
+    }
+
+    .y80{
+      top : 115px;
+    }
+
+    #x20 {
+      left : 210px;
+    }
+
+    #x40 {
+      left : 330px;
+    }
+
+    #x60 {
+      left : 450px;
+    }
+
+    #x80 {
+      left : 570px;
+    }
+
+    #renderer2 {
+      margin-left : 800px;
+      position : relative;
+    }
+
+    #barGraph{
+      width : 600px;
+      height : 600px;
+      margin : 0 auto;
+    }
+
+    .bar{
+      padding-right : 2px;
+    }
+  script.
+
+    var scatterData = []
+
+    makeData(scatterData, 100, 'scatterData')
+
+    var root = d3.select('#scatterPlot').append('svg').attr({
+      width: 650,
+      height: 650
+    })
+
+    /*가이드 라인*/
+    drawGuidLine(root);
+
+    for (var i = 1; i < 5; i++) {
+      drawLine(root, 0, 120 * i, 600, 120 * i, 2, 'rgb(238,238,238)');
+      drawLine(root, 120 * i, 0, 120 * i, 600, 2, 'rgb(238,238,238)');
+    }
+
+    for(var i=0; i<scatterData.length; i++){
+      drawCircle(root, (scatterData[i].x*6), (600-scatterData[i].y*6), 4)
+    }
+
+    /*바 그래프*/
+    var barRoot = d3.select('#barGraph').append('svg').attr({
+      width : 650,
+      height : 650
+    })
+
+    var barGraphData = []
+
+    makeData(barGraphData, 100, 'barGraph');
+
+    /*가이드 라인*/
+    drawGuidLine(barRoot);
+
+    for (var i = 1; i < 5; i++) {
+      drawLine(barRoot, 0, 120 * i, 600, 120 * i, 2, 'rgb(238,238,238)');
+    }
+
+    console.log(quickSorting(barGraphData, 0, barGraphData.length-1))
+
+
+
+    for(var i=0; i<barGraphData.length; i++){
+      drawRect(barRoot, i*6, 600-barGraphData[i]*60, 4, barGraphData[i]*60)
+    }
+
+
+
+
+
+
+
+
+
+
+
+    function makeData(array, number, kind){
+      if(kind == 'scatterData'){
+        for(var i=0; i<number; i++){
+          array.push({
+            name : 'node_'+i,
+            x : Math.random() * 100,
+            y : Math.random() * 100
+          })
+        }
+      }else{
+        for(var i=0; i<number; i++){
+          array.push(Math.random() * 10);
+        }
+      }
+    }
+
+
+
+    function drawLine(root, x1, y1, x2, y2, strokeWidth, stroke){
+      root.append('line').attr({
+        x1 : x1,
+        y1 : y1,
+        x2 : x2,
+        y2 : y2,
+        strokeWidth : strokeWidth,
+        stroke : stroke
+      })
+    }
+
+    function drawCircle(root, cx, cy, r){
+      root.append('circle').attr({
+        cx : cx,
+        cy : cy,
+        r : r
+      })
+    }
+
+    function drawRect(root, x, y, width, height){
+      root.append('rect').attr({
+        x: x + 2,
+        y: y,
+        width: width,
+        height: height,
+        fill: 'rgb(31,162,43)'
+      })
+    }
+
+    function drawGuidLine(root){
+      drawLine(root, 0, 600, 600, 600, 3, 'black');
+      drawLine(root, 0, 600, 0, 0, 3, 'black');
+    }
+
+    function quickSorting(arr, left, right){
+      var i,j,temp;
+      var pivot = arr[left]
+
+      if(left < right){
+        i = left
+        j = right+1
+
+        while(i<=j){
+          do
+          i++
+          while(arr[i] > pivot)
+
+          do
+          j--
+          while(arr[j] < pivot)
+
+          if(i<j){
+            temp = arr[i]
+            arr[i] = arr[j]
+            arr[j] = temp
+          }else{
+            break;
+          }
+        }
+
+        temp = arr[j]
+        arr[j] = arr[left]
+        arr[left] = temp
+
+        quickSorting(arr, left, j-1)
+        quickSorting(arr, j+1, right)
+
+      }
+
+    }
