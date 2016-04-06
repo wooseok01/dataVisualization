@@ -3,6 +3,7 @@ extends layout
 block content
 
   script(src='//d3js.org/d3.v3.min.js')
+  script(src='//code.jquery.com/jquery.min.js')
   div#renderer(style='width:800px;' + 'height:800px;')
     div#scatterPlot
     span.y20.absolute 20
@@ -49,39 +50,39 @@ block content
     .absolute{
       position : absolute;
       left : 75px;
-      top : 610px;
+      top : 510px;
     }
 
     .y20{
-      top : 475px;
+      top : 395px;
     }
 
     .y40 {
-      top : 355px;
+      top : 295px;
     }
 
     .y60{
-      top : 235px;
+      top : 195px;
     }
 
     .y80{
-      top : 115px;
+      top : 95px;
     }
 
     #x20 {
-      left : 210px;
+      left : 190px;
     }
 
     #x40 {
-      left : 330px;
+      left : 290px;
     }
 
     #x60 {
-      left : 450px;
+      left : 390px;
     }
 
     #x80 {
-      left : 570px;
+      left : 490px;
     }
 
     #renderer2 {
@@ -98,6 +99,7 @@ block content
     .bar{
       padding-right : 2px;
     }
+
   script.
 
     var scatterData = []
@@ -105,26 +107,63 @@ block content
     makeData(scatterData, 100, 'scatterData')
 
     var root = d3.select('#scatterPlot').append('svg').attr({
-      width: 650,
-      height: 650
+      width: 550,
+      height: 550
     })
 
     /*가이드 라인*/
     drawGuidLine(root);
 
     for (var i = 1; i < 5; i++) {
-      drawLine(root, 0, 120 * i, 600, 120 * i, 2, 'rgb(238,238,238)');
-      drawLine(root, 120 * i, 0, 120 * i, 600, 2, 'rgb(238,238,238)');
+      drawLine(root, 0, 100 * i, 500, 100 * i, 2, 'rgb(238,238,238)');
+      drawLine(root, 100 * i, 0, 100 * i, 500, 2, 'rgb(238,238,238)');
     }
 
     for(var i=0; i<scatterData.length; i++){
-      drawCircle(root, (scatterData[i].x*6), (600-scatterData[i].y*6), 4)
+      drawCircle(root, (scatterData[i].x*5), (500-scatterData[i].y*5), 3, scatterData[i].name)
     }
+
+
+    $('#scatterPlot svg circle').hover(function(){
+
+      var x = $(this).attr('cx')
+      var y = $(this).attr('cy')
+
+
+      drawLine(root,0, y, x-4, y).attr({
+        class : 'lineGuide',
+        stroke : 'rgba(255,11,2,0.5)'
+      })
+
+      drawLine(root, x, 500, x, y).attr({
+        class : 'lineGuide',
+        stroke : 'rgba(255,11,2,0.5)'
+      })
+
+      var ySpan = $('<span></span>').css({
+        left : '60px',
+        top : (y-6)+'px',
+        color : 'red',
+        position : 'absolute'
+      }).html(((500-y)/5).toFixed(2)).attr('class','lineGuide')
+
+      var xSpan = $('<span></span>').css({
+        left : ((x*1)+90)+'px',
+        top : '510px',
+        color : 'red',
+        position : 'absolute'
+      }).html((x/5).toFixed(2)).attr('class','lineGuide')
+
+      $('#renderer').append(ySpan)
+      $('#renderer').append(xSpan)
+    }, function(){
+      $('.lineGuide').remove();
+    })
 
     /*바 그래프*/
     var barRoot = d3.select('#barGraph').append('svg').attr({
-      width : 650,
-      height : 650
+      width : 500,
+      height : 500
     })
 
     var barGraphData = []
@@ -135,16 +174,37 @@ block content
     drawGuidLine(barRoot);
 
     for (var i = 1; i < 5; i++) {
-      drawLine(barRoot, 0, 120 * i, 600, 120 * i, 2, 'rgb(238,238,238)');
+      drawLine(barRoot, 0, 100 * i, 500, 100 * i, 2, 'rgb(238,238,238)');
     }
 
-    console.log(quickSorting(barGraphData, 0, barGraphData.length-1))
-
-
+    quickSorting(barGraphData, 0, barGraphData.length-1)
 
     for(var i=0; i<barGraphData.length; i++){
-      drawRect(barRoot, i*6, 600-barGraphData[i]*60, 4, barGraphData[i]*60)
+      drawRect(barRoot, i*5, 500-barGraphData[i]*50, 4, barGraphData[i]*50)
     }
+
+
+    $('#barGraph svg rect').hover(function(){
+      var x = $(this).attr('x')
+      var y = $(this).attr('y')
+
+      drawLine(barRoot, 0, y, ((x*1)+4), y,2).attr({
+        class : 'lineGuide',
+        stroke : 'rgba(255,11,2,0.5)'
+      })
+
+      var ySpan = $('<span></span>').css({
+        left : '65px',
+        top : ((y*1)-5)+'px',
+        color : 'red',
+        position : 'absolute'
+      }).html(((500-(y*1))/50).toFixed(2)).attr('class','lineGuide')
+
+      $('#renderer2').append(ySpan)
+
+    }, function(){
+      $('.lineGuide').remove()
+    })
 
 
 
@@ -172,10 +232,8 @@ block content
       }
     }
 
-
-
     function drawLine(root, x1, y1, x2, y2, strokeWidth, stroke){
-      root.append('line').attr({
+       var line = root.append('line').attr({
         x1 : x1,
         y1 : y1,
         x2 : x2,
@@ -183,29 +241,32 @@ block content
         strokeWidth : strokeWidth,
         stroke : stroke
       })
+      return line
     }
 
-    function drawCircle(root, cx, cy, r){
+    function drawCircle(root, cx, cy, r, name){
       root.append('circle').attr({
         cx : cx,
         cy : cy,
-        r : r
-      })
+        r : r,
+        name : name,
+        fill : 'rgba(31,162,43,0.7)'
+      }).style('opacity',0).transition().style("opacity",1).duration(1500)
     }
 
     function drawRect(root, x, y, width, height){
       root.append('rect').attr({
         x: x + 2,
-        y: y,
+        y: '500px',
         width: width,
         height: height,
-        fill: 'rgb(31,162,43)'
-      })
+        fill: 'rgba(31,162,43,0.7)'
+      }).transition().attr('y',y).duration(1500)
     }
 
     function drawGuidLine(root){
-      drawLine(root, 0, 600, 600, 600, 3, 'black');
-      drawLine(root, 0, 600, 0, 0, 3, 'black');
+      drawLine(root, 0, 500, 500, 500, 3, 'black');
+      drawLine(root, 0, 500, 0, 0, 3, 'black');
     }
 
     function quickSorting(arr, left, right){
